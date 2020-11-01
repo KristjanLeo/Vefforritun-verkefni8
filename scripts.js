@@ -14,7 +14,14 @@
  * @returns {string} Upprunalegi strengurinn hliðraður um n til hægri
  */
 function encode(str, n, alphabet = '') {
-  return '';
+  const hlidrun = n < alphabet.length ? n : alphabet.length - 1;
+  var encodedstr = "";
+  for(let i = 0; i < str.length; i++){
+    if(alphabet.indexOf(str[i]) != -1){
+      encodedstr += alphabet[(alphabet.indexOf(str[i]) + hlidrun) % alphabet.length];
+    }
+  }
+  return encodedstr;
 }
 
 /**
@@ -26,7 +33,14 @@ function encode(str, n, alphabet = '') {
  * @returns {string} Upprunalegi strengurinn hliðraður um n til vinstri
  */
 function decode(str, n, alphabet = '') {
-  return '';
+  const hlidrun = n < alphabet.length ? n : alphabet.length - 1;
+  var decodedstr = "";
+  for(let i = 0; i < str.length; i++){
+    if(alphabet.indexOf(str[i]) != -1){
+      decodedstr += alphabet[(alphabet.indexOf(str[i]) - hlidrun + alphabet.length) % alphabet.length];
+    }
+  }
+  return decodedstr;
 }
 
 const Caesar = (() => {
@@ -39,8 +53,50 @@ const Caesar = (() => {
   // Default hliðrun, uppfært af "shift"
   let shift = 3;
 
+  // Default strengur
+  let str = '';
+
+  let resultBar = document.querySelector('.result');
+
   function init(el) {
     // Setja event handlera á viðeigandi element
+    el.alphabet.addEventListener('input', (e) => {
+      alphabet = e.target.value;
+      el.children[2].children[1].children[0].max = alphabet.length;
+      if(type === 'encode'){
+        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
+      }else{
+        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
+      }
+    });
+
+    el.children[1].addEventListener('change', (e) => {
+      type = e.target.value;
+      if(type === 'encode'){
+        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
+      }else{
+        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
+      }
+    });
+
+    el.children[2].addEventListener('input', (e) => {
+      shift = e.target.value;
+      el.children[2].children[1].children[1].innerText = shift;
+      if(type === 'encode'){
+        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
+      }else{
+        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
+      }
+    });
+
+    el.input.addEventListener('input', (e) => {
+      str = e.target.value.toLocaleUpperCase();
+      if(type === 'encode'){
+        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
+      }else{
+        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
+      }
+    });
   }
 
   return {
