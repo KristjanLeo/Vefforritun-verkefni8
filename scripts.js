@@ -1,8 +1,5 @@
 /**
  * Verkefni 8 – Caesar dulmál með vefviðmóti
- *
- * Verður að passa _nákvæmlega_ við gefið HTML, mun annars brotna.
- * Þ.e.a.s., ekki þarf að skrifa meðhöndlun á HTML elementum sem vantar
  */
 
 /**
@@ -15,9 +12,9 @@
  */
 function encode(str, n, alphabet = '') {
   const hlidrun = n < alphabet.length ? n : alphabet.length - 1;
-  var encodedstr = "";
-  for(let i = 0; i < str.length; i++){
-    if(alphabet.indexOf(str[i]) != -1){
+  let encodedstr = '';
+  for (let i = 0; i < str.length; i += 1) {
+    if (alphabet.indexOf(str[i]) !== -1) {
       encodedstr += alphabet[(alphabet.indexOf(str[i]) + hlidrun) % alphabet.length];
     }
   }
@@ -34,68 +31,64 @@ function encode(str, n, alphabet = '') {
  */
 function decode(str, n, alphabet = '') {
   const hlidrun = n < alphabet.length ? n : alphabet.length - 1;
-  var decodedstr = "";
-  for(let i = 0; i < str.length; i++){
-    if(alphabet.indexOf(str[i]) != -1){
-      decodedstr += alphabet[(alphabet.indexOf(str[i]) - hlidrun + alphabet.length) % alphabet.length];
+  const alength = alphabet.length;
+  let decodedstr = '';
+  for (let i = 0; i < str.length; i += 1) {
+    if (alphabet.indexOf(str[i]) !== -1) {
+      decodedstr += alphabet[(alphabet.indexOf(str[i]) - hlidrun + alength) % alength];
     }
   }
   return decodedstr;
 }
 
+/**
+ * Athugar hvort það eigi að kóða eða afkóða streng
+ *
+ * @param  {string} str      Strengurinn sem á að kóða eða afkóða
+ * @param  {number} n        Hversu mikið skal hliðra [0, lengd stafrófs]
+ * @param  {string} alphabet Hvaða stafir eru í viðeigandi stafrófi
+ * @param  {string} type     Hvort á eigi að kóða eða afkóða
+ * @return {string}          Afkóðaði eða kóðaði strengurinn
+ */
+function encodeordecode(str, n, alphabet = '', type) {
+  if (type === 'encode') {
+    return encode(str, n, alphabet);
+  }
+  return decode(str, n, alphabet);
+}
+
 const Caesar = (() => {
-  // Default stafróf, uppfært þegar slegið inn í "alphabet"
   let alphabet = 'AÁBDÐEÉFGHIÍJKLMNOÓPRSTUÚVXYÝÞÆÖ';
-
-  // Default type, uppfært af radio input
   let type = 'encode';
-
-  // Default hliðrun, uppfært af "shift"
   let shift = 3;
-
-  // Default strengur
   let str = '';
 
-  let resultBar = document.querySelector('.result');
+  const resultBar = document.querySelector('.result');
+  const shiftBar = document.querySelector('input[name="shift"]');
+  const shiftValue = document.querySelector('.shiftValue');
 
   function init(el) {
-    // Setja event handlera á viðeigandi element
+    // Event handlerar (kalla á annað hvort encode eða decode eftir type)
     el.alphabet.addEventListener('input', (e) => {
       alphabet = e.target.value;
-      el.children[2].children[1].children[0].max = alphabet.length;
-      if(type === 'encode'){
-        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
-      }else{
-        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
-      }
+      shiftBar.max = alphabet.length;
+      resultBar.innerText = encodeordecode(str, Number.parseInt(shift, 10), alphabet, type);
     });
 
-    el.children[1].addEventListener('change', (e) => {
+    el.querySelector('.radio').addEventListener('change', (e) => {
       type = e.target.value;
-      if(type === 'encode'){
-        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
-      }else{
-        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
-      }
+      resultBar.innerText = encodeordecode(str, Number.parseInt(shift, 10), alphabet, type);
     });
 
-    el.children[2].addEventListener('input', (e) => {
+    el.querySelector('.range').addEventListener('input', (e) => {
       shift = e.target.value;
-      el.children[2].children[1].children[1].innerText = shift;
-      if(type === 'encode'){
-        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
-      }else{
-        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
-      }
+      shiftValue.innerText = shift;
+      resultBar.innerText = encodeordecode(str, Number.parseInt(shift, 10), alphabet, type);
     });
 
     el.input.addEventListener('input', (e) => {
       str = e.target.value.toLocaleUpperCase();
-      if(type === 'encode'){
-        resultBar.innerText = encode(str, Number.parseInt(shift), alphabet);
-      }else{
-        resultBar.innerText = decode(str, Number.parseInt(shift), alphabet);
-      }
+      resultBar.innerText = encodeordecode(str, Number.parseInt(shift, 10), alphabet, type);
     });
   }
 
@@ -106,6 +99,5 @@ const Caesar = (() => {
 
 document.addEventListener('DOMContentLoaded', () => {
   const ceasarForm = document.querySelector('.ceasar');
-
   Caesar.init(ceasarForm);
 });
